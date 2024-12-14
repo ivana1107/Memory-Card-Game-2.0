@@ -3,6 +3,7 @@ import random
 import os
 from effects import *
 #from UI_app.end_screens import end_screen
+from timer import timer
 
 print("main_menu.py is being loaded")
 
@@ -52,8 +53,8 @@ class MemoryCardGame:
 
         # Game configuration
         self.font = pygame.font.Font("Assets/Pixelicious.ttf", 30)
-        self.game_width = game_width
-        self.game_height = game_height
+        self.game_width = int(game_width)
+        self.game_height = int(game_height)
         self.pic_size = pic_size
         self.padding = padding
         self.left_margin = left_margin
@@ -93,26 +94,30 @@ class MemoryCardGame:
 
     def run(self, selected_level):
         """Main entry point for the game."""
+        self.selected_level = selected_level
         selected_level = main_menu(self.screen)
 
         if not selected_level:
             print("No difficulty selected, exiting.")
+            pygame.quit()
             return
 
         print(f"Starting game at {selected_level} difficulty.")
 
         level_manager = Level(self.screen, self.bg_image, self.game_width, self.game_height, self.get_font(30), self.GRAY)
+        game_timer = timer(self.screen, self.font, self.selected_level)
 
         try:
             # Set up the game with the selected difficulty
-            nem_pics, nem_pics_rect, selected_images, hidden_images = level_manager.setup_game(selected_level)
+            nem_pics, nem_pics_rect, selected_images, hidden_images = level_manager.setup_game(self.selected_level)
         except ValueError as e:
             print(f"Error: {e}")
             print("Returning to main menu...")
             return  # Return to main menu instead of crashing
 
         # Start the game loop
-        level_manager.game_loop(selected_images, hidden_images)
+        print("Starting the game loop...")
+        level_manager.game_loop(selected_images, hidden_images, game_timer)
         print("Game over!")
 
 def difficulty_selection(screen, get_font):
@@ -252,7 +257,9 @@ class Level:
 
     print("Game setup complete. Starting game loop...")
 
-    def game_loop(self, selected_images, hidden_images):
+
+
+    def game_loop(self, selected_images, hidden_images, game_timer):
         """Main game loop."""
         print("Entering game loop...")
         matched_cards = set()  # Keep track of matched cards
@@ -262,6 +269,12 @@ class Level:
             clock.tick(30)  # Limit to 30 frames per second
             self.screen.blit(self.bg_image, (0, 0))  # Draw background image
 
+            game_timer.update()
+            game_timer.display()
+
+            if game_timer.is_time_up():
+                print("Time's up!")
+                return
             # Draw all cards (either hidden or revealed)
             for idx, rect in enumerate(self.nem_pics_rect):
                 if hidden_images[idx]:

@@ -1,6 +1,7 @@
 import pygame
-from start_screen import MemoryCardGame  # Import the game class from start_screen.py
-from start_screen import main_menu  # Import main_menu from start_screen.py if needed
+from start_screen import main_menu # Import main_menu from start_screen.py if needed
+from start_screen import MemoryCardGame
+from start_screen import Level
 
 # Initialize Pygame and Mixer
 pygame.init()
@@ -19,12 +20,9 @@ def main():
     SCREEN_HEIGHT = 760
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Memory Card Game")
-
-    # Create an instance of MemoryCardGame
-    game = MemoryCardGame(game_width=SCREEN_WIDTH, game_height=SCREEN_HEIGHT)
     
     # Call the main menu function to select difficulty
-    selected_level = main_menu(game.screen)
+    selected_level = main_menu(screen)
     
     if not selected_level:
         print("No difficulty selected, exiting.")
@@ -33,8 +31,21 @@ def main():
 
     print(f"Starting game at {selected_level} difficulty.")
     
+     # Initialize the Game object with selected difficulty and other assets
+    assets = {
+        'memory_pictures': [],  # List your memory pictures here
+        'pic_size': 128,  # Size of cards
+        'padding': 10,  # Padding between cards
+        'left_margin': 75,
+        'top_margin': 70,
+        'bg_image': pygame.image.load('Assets/bg/game_layout.png')
+    }
+
+    # Create the Game instance
+    game_instance = MemoryCardGame(screen, selected_level, assets)
+
     # Run the game with the selected difficulty level
-    game.run(selected_level)
+    game_instance.game_loop() 
 
     pygame.quit()
 
