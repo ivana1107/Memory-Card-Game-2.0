@@ -1,14 +1,30 @@
-# import pygame
-# import time
+import pygame
+import sys
 
-# class Timer:
-#     def __init__(self, screen, font, level):
-#         initialize time limit disini juga for each level
-    
-#     def display(self):
-#         lgsg display di bubble text kucingnya
+class timer:
+    def __init__(self, screen, font, level):
+        self.screen = screen
+        self.level = level
+        self.time_limits = {"easy": 30, "medium": 50, "hard": 80}
+        self.start_time = pygame.time.get_ticks()
+        self.time_limit = self.time_limits[level]
+        self.time_left = self.time_limit
+        self.font = pygame.font.Font('Assets/Pixelicious.ttf', 45)
 
-#     def is_time_up(self):
-#         kalo waktu habis output ke end screen lose
+        self.timer_x = 850
+        self.timer_y = 140
 
-# kalo ada waktu lebih, pas timenya udh mo abis ditambain suara
+    def update(self):
+        # Calculate time left
+        elapsed_time = (pygame.time.get_ticks() - self.start_time) / 1000
+        self.time_left = max(0, self.time_limit - elapsed_time)
+
+    def display(self):
+        # Render and display the timer on the top right
+        timer_text = self.font.render(f"Time: {int(self.time_left)}s", True, (0, 0, 0))
+        timer_x = self.screen.get_width() - timer_text.get_width() - 20
+        self.screen.blit(timer_text, (self.timer_x, self.timer_y))
+
+    def is_time_up(self):
+        # Check if time is up
+        return self.time_left <= 0
