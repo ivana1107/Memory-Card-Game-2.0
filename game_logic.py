@@ -1,19 +1,20 @@
 import pygame
 import random
 import time
+from timer import timer
 
 class GameLogic:
-    def __init__(self, screen, difficulty, assets, font):
+    def __init__(self, screen, difficulty, assets):
         self.screen = screen
         self.difficulty = difficulty
         self.assets = assets
-        self.font = font
         self.rows, self.cols, self.num_bombs = self.get_level_config()
         self.cards = []
         self.flipped_cards = []
         self.matched_cards = set()
-        self.start_time = time.time()
-        self.time_limit = 60  # seconds
+        self.bomb_indices = []
+        self.bomb_shuffled = False
+        self.game_timer = timer(screen, pygame.font.Font('Assets/Pixelicious.ttf', 45), difficulty)
 
     def get_level_config(self):
         if self.difficulty == "easy":
@@ -21,7 +22,7 @@ class GameLogic:
         elif self.difficulty == "medium":
             return 4, 4, 2
         elif self.difficulty == "hard":
-            return 5, 5, 4
+            return 5, 5, 3
 
     def load_cards(self):
         # Select images for pairs and bomb
@@ -31,6 +32,7 @@ class GameLogic:
         images += ['bomb'] * self.num_bombs
         random.shuffle(images)
         self.cards = images
+        self.bomb_indices = [i for i, card in enumerate(self.cards) if card == 'bomb']
 
     def draw_board(self):
         # Draw the game board
@@ -54,33 +56,35 @@ class GameLogic:
     def check_match(self):
         if len(self.flipped_cards) == 2:
             idx1, idx2 = self.flipped_cards
-            if self.cards[idx1] == self.cards[idx2]:
-                if self.cards[idx1] == 'bomb':
-                    # Shuffle unmatched cards
-                    self.shuffle_cards()
-                else:
-                    self.matched_cards.update(self.flipped_cards)
+            card1, card2 = self.cards[idx1], self.cards[idx2]
+            if card1 == 'bomb' or card2 == 'bomb':
+                # Bomb triggered: Shuffle unmatched cards and keep bomb open
+                if not self.bomb_shuffled:
+                    self.shuffle_unmatched_cards()
+                    self.bomb_shuffled = True
+                self.matched_cards.update([idx1, idx2])  # Bomb stays open
+            elif card1 == card2:
+                # Match found: Keep cards open
+                self.matched_cards.update(self.flipped_cards)
             else:
-                # Flip back if not a match
-                pygame.time.wait(500)  # Brief delay for visualization
+                # No match: Brief delay and flip back
+                pygame.display.update()
+                pygame.time.wait(700)
+
             self.flipped_cards = []
 
-    def shuffle_cards(self):
+    def shuffle_unmatched_cards(self):
+        # Shuffle all unmatched cards except for already matched cards and flipped bombs
         unmatched_indices = [
-            i for i in range(len(self.cards)) if i not in self.matched_cards
+            i for i in range(len(self.cards)) if i not in self.matched_cards and self.cards[i] != 'bomb'
         ]
         unmatched_cards = [self.cards[i] for i in unmatched_indices]
         random.shuffle(unmatched_cards)
+
+        # Reassign shuffled cards to their indices
         for i, idx in enumerate(unmatched_indices):
             self.cards[idx] = unmatched_cards[i]
 
-    def is_game_over(self):
-        elapsed_time = time.time() - self.start_time
-        if len(self.matched_cards) == len(self.cards) - self.num_bombs:
-            return "win"
-        elif elapsed_time >= self.time_limit:
-            return "lose"
-        return None
 
     def handle_click(self, pos):
         for idx in range(len(self.cards)):
@@ -102,18 +106,23 @@ class GameLogic:
             self.screen.blit(self.assets['bg_image'], (0, 0))
             self.draw_board()
 
+            self.game_timer.update()
+            self.game_timer.display()
+
+            if self.game_timer.is_time_up():
+                return "lose"
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    return
+                    return "quit"
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.handle_click(event.pos)
 
             self.check_match()
 
-            result = self.is_game_over()
-            if result:
-                return result
+            if len(self.matched_cards) == len(self.cards) - self.num_bombs:
+                return "win"
 
             pygame.display.update()
             clock.tick(30)
