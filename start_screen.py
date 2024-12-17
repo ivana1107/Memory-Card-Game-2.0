@@ -2,8 +2,7 @@ import pygame
 import random
 import os
 from effects import *
-#from UI_app.end_screens import end_screen
-from timer import timer
+from game_logic import GameLogic
 
 print("main_menu.py is being loaded")
 
@@ -105,7 +104,6 @@ class MemoryCardGame:
         print(f"Starting game at {selected_level} difficulty.")
 
         level_manager = Level(self.screen, self.bg_image, self.game_width, self.game_height, self.get_font(30), self.GRAY)
-        game_timer = timer(self.screen, self.font, self.selected_level)
 
         try:
             # Set up the game with the selected difficulty
@@ -116,8 +114,7 @@ class MemoryCardGame:
             return  # Return to main menu instead of crashing
 
         # Start the game loop
-        print("Starting the game loop...")
-        level_manager.game_loop(selected_images, hidden_images, game_timer)
+        level_manager.game_loop(selected_images, hidden_images)
         print("Game over!")
 
 def difficulty_selection(screen, get_font):
