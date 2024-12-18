@@ -74,14 +74,15 @@ class GameLogic:
             self.flipped_cards = []
 
     def shuffle_unmatched_cards(self):
-        # Shuffle all unmatched cards except for already matched cards and flipped bombs
+        # Get the indices of all unmatched (hidden) and non-bomb cards
         unmatched_indices = [
-            i for i in range(len(self.cards)) if i not in self.matched_cards and self.cards[i] != 'bomb'
+            i for i in range(len(self.cards))
+            if i not in self.matched_cards and self.cards[i] != 'bomb'
         ]
         unmatched_cards = [self.cards[i] for i in unmatched_indices]
         random.shuffle(unmatched_cards)
 
-        # Reassign shuffled cards to their indices
+        # Replace cards with shuffled ones
         for i, idx in enumerate(unmatched_indices):
             self.cards[idx] = unmatched_cards[i]
 
@@ -102,6 +103,8 @@ class GameLogic:
         clock = pygame.time.Clock()
 
         while True:
+            clock.tick(30)
+            
             self.screen.fill((0, 0, 0))
             self.screen.blit(self.assets['bg_image'], (0, 0))
             self.draw_board()
@@ -125,4 +128,4 @@ class GameLogic:
                 return "win"
 
             pygame.display.update()
-            clock.tick(30)
+
