@@ -2,6 +2,7 @@ import pygame
 from start_screen import main_menu  # Import main_menu from start_screen.py if needed
 from start_screen import MemoryCardGame
 from game_logic import GameLogic
+from end_screen import EndScreen
 
 # Initialize Pygame and Mixer
 pygame.init()
@@ -47,12 +48,14 @@ def main():
     game = GameLogic(screen, selected_level, assets)
     result = game.game_loop()
 
-    if result == "win":
-        print("You won!")
-    elif result == "lose":
-        print("You lost!")
-
-    pygame.quit()
+    # Display end screen
+    next_action = EndScreen(screen, result, selected_level)
+    if next_action == "menu":
+        main()  # Go back to the main menu
+    elif next_action == "play_again":
+        # Replay the selected level
+        game = GameLogic(screen, selected_level, assets)
+        result = game.game_loop()
 
 if __name__ == "__main__":
     main()
