@@ -18,6 +18,7 @@ class GameLogic:
         self.game_timer = timer(
             screen, pygame.font.Font("Assets/Pixelicious.ttf", 45), difficulty
         )
+        self.tap_sound = pygame.mixer.Sound("Assets/tap.wav")
 
         self.card_rects = []  # Store card rects
         self.left_margin = 0
@@ -323,3 +324,6 @@ class GameLogic:
         self.game_timer.reset()
         self.load_assets()  # Load the card back image
         self.load_cards()
+
+    def card_click(self, card_x, card_y):
+        self.tap_sound.play()

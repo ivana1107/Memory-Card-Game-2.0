@@ -20,6 +20,9 @@ class Button:
         self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
         self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
 
+        pygame.mixer.init()
+        self.sound = pygame.mixer.Sound("Assets/tap.wav")
+
         # Set up button appearance
         if self.image is None:
             self.image = self.text
@@ -39,10 +42,13 @@ class Button:
         else:
             self.text = self.font.render(self.text_input, True, self.base_color)
 
+    def play_click_sound(self):
+        self.sound.play()
+
     def checkForInput(self, position):
         """Check if the button is clicked."""
-        return self.rect.collidepoint(position)
+        if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
+            self.play_click_sound()
+            return True
+        return False
 
-# kalo ada wakty sound per click 
-# -> click card
-# -> click bomb

@@ -3,14 +3,20 @@ from effects import Button
 
 def EndScreen(screen, result, selected_level):
     pygame.init()
+    pygame.mixer.init()
 
     # Load assets
     if result == "win":
         background = pygame.image.load("Assets/bg/win_screen.png")
+        sound = pygame.mixer.Sound("Assets/win.wav")
     elif result == "lose":
         background = pygame.image.load("Assets/bg/lose_screen.png")
+        sound = pygame.mixer.Sound("Assets/lose.wav")
     else:
         raise ValueError("Invalid result: should be 'win' or 'lose'")
+
+    # Play sound effect
+    sound.play ()
 
     # Scale background to fit screen
     background = pygame.transform.scale(background, screen.get_size())
