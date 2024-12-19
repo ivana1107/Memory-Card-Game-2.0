@@ -1,5 +1,5 @@
 import pygame
-from start_screen import main_menu # Import main_menu from start_screen.py if needed
+from start_screen import main_menu  # Import main_menu from start_screen.py if needed
 from start_screen import MemoryCardGame
 from game_logic import GameLogic
 
@@ -13,7 +13,6 @@ pygame.mixer.init()
 
 def main():
     """Main entry point for the game."""
-    pygame.init()  # Initialize Pygame
 
     # Set up screen dimensions
     SCREEN_WIDTH = 1200
@@ -30,16 +29,18 @@ def main():
         pygame.quit()
         return
     
-     # Initialize the Game object with selected difficulty and other assets
+    # Initialize the Game object with selected difficulty and other assets
     assets = {
         'memory_pictures': memory_game.memory_pictures, 
-        'pic_size': 128,  # Size of cards
-        'padding': 10,  # Padding between cards
-        'left_margin': 75,
-        'top_margin': 70,
-        'bg_image': pygame.image.load('Assets/bg/game_layout.png'),
-        'bomb_image' : pygame.image.load('Assets/bomb.png'),
-        'GRAY' : (200, 200, 200)
+        'pic_size': memory_game.pic_size,  # Size of cards
+        'padding': memory_game.padding,  # Padding between cards
+        'left_margin': memory_game.left_margin,
+        'top_margin': memory_game.top_margin,
+        'bg_image': memory_game.bg_image,
+        'bomb_image' : memory_game.bomb_image,
+        'GRAY' : memory_game.GRAY,
+        'game_width': SCREEN_WIDTH,
+        'game_height': SCREEN_HEIGHT
     }
 
     # Create the Game instance
@@ -55,4 +56,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
