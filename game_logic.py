@@ -207,3 +207,39 @@ class GameLogic:
         self.flip_time = 0
         self.game_timer.reset()  # Assuming you have a reset method in your timer class
         self.load_cards()
+
+    def load_assets(self):
+        # Load card back image
+        self.card_back = pygame.image.load("Assets/card_back.png")
+        self.card_back = pygame.transform.scale(self.card_back, (self.assets["pic_size"], self.assets["pic_size"]))
+
+    def draw_board(self):
+        # Draw the game board
+        for idx, card in enumerate(self.cards):
+            rect = self.card_rects[idx]  # Use stored rect
+
+            if idx in self.flipped_cards or idx in self.matched_cards:
+                if card == "bomb":
+                    self.screen.blit(self.assets["bomb_image"], rect)
+                else:
+                    image = pygame.image.load(f"Assets/object/{card}.png")
+                    image = pygame.transform.scale(
+                        image, (self.assets["pic_size"], self.assets["pic_size"])
+                    )
+                    self.screen.blit(image, rect)
+            else:
+                # Draw card back image instead of gray rectangle
+                self.screen.blit(self.card_back, rect)
+
+    def reset_game(self):
+        """Resets the game state for a new game."""
+        self.cards = []
+        self.flipped_cards = []
+        self.matched_cards = set()
+        self.bomb_indices = []
+        self.bomb_shuffled = False
+        self.card_rects = []
+        self.flip_time = 0
+        self.game_timer.reset()
+        self.load_assets()  # Load the card back image
+        self.load_cards()
