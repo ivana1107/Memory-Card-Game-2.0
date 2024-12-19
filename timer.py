@@ -23,7 +23,6 @@ class timer:
         self.shake_speed = 3
         self.shake_intensity = 4
 
-
     def update(self):
         # Calculate time left
         elapsed_time = (pygame.time.get_ticks() - self.start_time) / 1000
@@ -34,35 +33,35 @@ class timer:
             self.warning_sound.play()
             self.sound_played = True
         elif self.time_left > 6:
-           self.sound_played = False #reset sound if time left is more than 5
-
+            self.sound_played = False  # Reset sound if time left is more than 5
 
     def display(self):
         # Render and display the timer on the top right
         timer_text = self.font.render(f"Time: {int(self.time_left)}s", True, (0, 0, 0))
         text_color = (0, 0, 0)
-        
+
         # Animation logic
         if self.time_left <= 6:
-            text_color = (255, 0, 0) # Red Text
-            
+            text_color = (255, 0, 0)  # Red Text
+
             # Make text vibrate
             self.shake_offset = int(math.sin(pygame.time.get_ticks() * self.shake_speed) * self.shake_intensity)
             timer_x = self.timer_x + self.shake_offset
-            
+
             timer_text = self.font.render(f"Time: {int(self.time_left)}s", True, text_color)
-        
         else:
-          timer_x = self.timer_x
+            timer_x = self.timer_x
 
         self.screen.blit(timer_text, (timer_x, self.timer_y))
-    
+
     def is_time_up(self):
         # Check if time is up
         return self.time_left <= 0
-    
-    def reset(self):
-        """Resets the timer to its initial state."""
+
+    def reset(self, level):
+        """Resets the timer to its initial state with new time limit based on level."""
+        self.level = level
         self.start_time = pygame.time.get_ticks()
-        self.time_left = self.time_limit  # Reset time_left as well
-        self.time_up = False
+        self.time_limit = self.time_limits[level]  # Update time_limit based on level
+        self.time_left = self.time_limit
+        self.sound_played = False
