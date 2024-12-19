@@ -88,6 +88,7 @@ class MemoryCardGame:
         except FileNotFoundError as e:
             print(f"Error loading memory pictures: {e}")
 
+
     def get_font(self, size):
         return pygame.font.Font("Assets/Pixelicious.ttf", size)
 
@@ -103,7 +104,7 @@ class MemoryCardGame:
 
         print(f"Starting game at {selected_level} difficulty.")
 
-        level_manager = Level(self.screen, self.bg_image, self.game_width, self.game_height, self.get_font(30), self.GRAY)
+        # level_manager = Level(self.screen, self.bg_image, self.game_width, self.game_height, self.get_font(30), self.GRAY)
 
         try:
             # Set up the game with the selected difficulty
