@@ -7,7 +7,7 @@ class timer:
         self.level = level
         self.time_limits = {"easy": 30, "medium": 50, "hard": 80}
         self.start_time = pygame.time.get_ticks()
-        self.time_limit = self.time_limits[level]
+        self.time_limit = self.time_limits.get(level, 60)  # Default time limit of 60 seconds
         self.time_left = self.time_limit
         self.font = pygame.font.Font('Assets/Pixelicious.ttf', 45)
 
@@ -28,3 +28,9 @@ class timer:
     def is_time_up(self):
         # Check if time is up
         return self.time_left <= 0
+    
+    def reset(self):
+        """Resets the timer to its initial state."""
+        self.start_time = pygame.time.get_ticks()
+        self.time_left = self.time_limit  # Reset time_left as well
+        self.time_up = False

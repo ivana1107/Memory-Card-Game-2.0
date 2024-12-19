@@ -6,9 +6,10 @@ from timer import timer
 class GameLogic:
     def __init__(self, screen, difficulty, assets):
         self.screen = screen
+        if difficulty is None:
+            difficulty = "easy"
         self.difficulty = difficulty
         self.assets = assets
-        self.rows, self.cols, self.num_bombs = self.get_level_config()
         self.cards = []
         self.flipped_cards = []
         self.matched_cards = set()
@@ -34,6 +35,7 @@ class GameLogic:
             return 5, 5, 3
 
     def load_cards(self):
+        self.rows, self.cols, self.num_bombs = self.get_level_config()
         # Get game_width from screen
         game_width = self.screen.get_width()
         game_height = self.screen.get_height()
@@ -48,10 +50,8 @@ class GameLogic:
             - self.assets["padding"]
         )
 
-        # self.left_margin = (game_width - board_width) // 2
         # Adjust left_margin to be closer to the left edge
-        self.left_margin = (game_width - board_width) // 4  # Reduced from //2 to //4 to shift left
-
+        self.left_margin = (game_width - board_width) // 4  # Reduced to //4 to shift left
         self.top_margin = (game_height - board_height) // 2  # Center vertically
 
         # Select images for pairs and bomb
@@ -195,3 +195,15 @@ class GameLogic:
                 return "win"
 
             pygame.display.update()
+
+    def reset_game(self):
+        """Resets the game state for a new game."""
+        self.cards = []
+        self.flipped_cards = []
+        self.matched_cards = set()
+        self.bomb_indices = []
+        self.bomb_shuffled = False
+        self.card_rects = []
+        self.flip_time = 0
+        self.game_timer.reset()  # Assuming you have a reset method in your timer class
+        self.load_cards()
