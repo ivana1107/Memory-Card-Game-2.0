@@ -19,7 +19,7 @@ def main_menu(screen):
             pos=(375, 430),
             text_input="new game",
             font=get_font(45),
-            base_color="white",
+            base_color=(66, 94, 150),
             hovering_color="yellow",
         )
         quit_button = Button(
@@ -27,7 +27,7 @@ def main_menu(screen):
             pos=(310, 520),
             text_input="exit",
             font=get_font(45),
-            base_color="white",
+            base_color=(66, 94, 150),
             hovering_color="red",
         )
 
@@ -104,7 +104,6 @@ class MemoryCardGame:
 
         print(f"Starting game at {selected_level} difficulty.")
 
-        # level_manager = Level(self.screen, self.bg_image, self.game_width, self.game_height, self.get_font(30), self.GRAY)
 
         try:
             # Set up the game with the selected difficulty
@@ -131,7 +130,7 @@ def difficulty_selection(screen, get_font):
             pos=(310, 400),
             text_input="easy",
             font=get_font(45),
-            base_color="white",
+            base_color=(66, 94, 150),
             hovering_color="green",
         )
         medium_button = Button(
@@ -139,7 +138,7 @@ def difficulty_selection(screen, get_font):
             pos=(345, 470),
             text_input="medium",
             font=get_font(45),
-            base_color="white",
+            base_color=(66, 94, 150),
             hovering_color="orange",
         )
         hard_button = Button(
@@ -147,7 +146,7 @@ def difficulty_selection(screen, get_font):
             pos=(310, 550),
             text_input="hard",
             font=get_font(45),
-            base_color="white",
+            base_color=(66, 94, 150),
             hovering_color="red",
         )
 
