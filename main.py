@@ -41,12 +41,15 @@ def main():
     # Create the Game instance outside the loop
     game = GameLogic(screen, None, assets)  # Initialize with None for difficulty
 
+    selected_level = None
+
     while True:  # Main game loop
-        # Call the main menu function to select difficulty
-        selected_level = main_menu(screen)
-        if not selected_level:
-            pygame.quit()
-            return
+        # Get difficulty level from menu only if it's not set
+        if selected_level is None:
+            selected_level = main_menu(screen)
+            if not selected_level:
+                pygame.quit()
+                return
 
         # Reinitialize the game logic for a new game
         game.difficulty = selected_level
@@ -58,12 +61,11 @@ def main():
         if result:
             action = EndScreen(screen, result, selected_level)
             if action == "play_again":
-                continue  # Start a new game
+                # Keep the current difficulty level
+                game.reset_game()
+                continue  # Start a new game with the same difficulty
             elif action == "menu":
-                selected_level = main_menu(screen)  # Go back to the main menu
-                if not selected_level:  # Check if the user wants to exit
-                    pygame.quit()
-                    return
+                selected_level = None  # Reset difficulty to trigger main menu on next iteration
             else:
                 break
 
