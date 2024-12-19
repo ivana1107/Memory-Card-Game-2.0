@@ -1,8 +1,8 @@
 import pygame
-from start_screen import main_menu  # Import main_menu from start_screen.py if needed
+from start_screen import main_menu
 from start_screen import MemoryCardGame
 from game_logic import GameLogic
-from end_screen import EndScreen
+from end_screen import EndScreen  # Import the EndScreen function
 
 # Initialize Pygame and Mixer
 pygame.init()
@@ -20,42 +20,54 @@ def main():
     SCREEN_HEIGHT = 760
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Flip and Find")
-    
+
     memory_game = MemoryCardGame()
     memory_game.load_assets()
 
-    # Call the main menu function to select difficulty
-    selected_level = main_menu(screen)
-    if not selected_level:
-        pygame.quit()
-        return
-    
-    # Initialize the Game object with selected difficulty and other assets
+    # Initialize assets dictionary
     assets = {
-        'memory_pictures': memory_game.memory_pictures, 
-        'pic_size': memory_game.pic_size,  # Size of cards
-        'padding': memory_game.padding,  # Padding between cards
+        'memory_pictures': memory_game.memory_pictures,
+        'pic_size': memory_game.pic_size,
+        'padding': memory_game.padding,
         'left_margin': memory_game.left_margin,
         'top_margin': memory_game.top_margin,
         'bg_image': memory_game.bg_image,
-        'bomb_image' : memory_game.bomb_image,
-        'GRAY' : memory_game.GRAY,
+        'bomb_image': memory_game.bomb_image,
+        'GRAY': memory_game.GRAY,
         'game_width': SCREEN_WIDTH,
         'game_height': SCREEN_HEIGHT
     }
 
-    # Create the Game instance
-    game = GameLogic(screen, selected_level, assets)
-    result = game.game_loop()
+    # Create the Game instance outside the loop
+    game = GameLogic(screen, None, assets)  # Initialize with None for difficulty
 
-    # Display end screen
-    next_action = EndScreen(screen, result, selected_level)
-    if next_action == "menu":
-        main()  # Go back to the main menu
-    elif next_action == "play_again":
-        # Replay the selected level
-        game = GameLogic(screen, selected_level, assets)
+    while True:  # Main game loop
+        # Call the main menu function to select difficulty
+        selected_level = main_menu(screen)
+        if not selected_level:
+            pygame.quit()
+            return
+
+        # Reinitialize the game logic for a new game
+        game.difficulty = selected_level
+        game.reset_game()
+
         result = game.game_loop()
+
+        # Handle game result and show end screen
+        if result:
+            action = EndScreen(screen, result, selected_level)
+            if action == "play_again":
+                continue  # Start a new game
+            elif action == "menu":
+                selected_level = main_menu(screen)  # Go back to the main menu
+                if not selected_level:  # Check if the user wants to exit
+                    pygame.quit()
+                    return
+            else:
+                break
+
+    pygame.quit()
 
 if __name__ == "__main__":
     main()
