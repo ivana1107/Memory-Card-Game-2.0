@@ -19,9 +19,9 @@ class GameLogic:
         )
 
         self.card_rects = []  # Store card rects
-        self.left_margin = 0  
+        self.left_margin = 0
         self.top_margin = self.assets["top_margin"]
-        
+
         # Keep track of time when cards are flipped
         self.flip_time = 0
 
@@ -47,12 +47,12 @@ class GameLogic:
             self.rows * (self.assets["pic_size"] + self.assets["padding"])
             - self.assets["padding"]
         )
-        
+
         # self.left_margin = (game_width - board_width) // 2
         # Adjust left_margin to be closer to the left edge
         self.left_margin = (game_width - board_width) // 4  # Reduced from //2 to //4 to shift left
-        
-        self.top_margin = (game_height - board_height) // 2 # Center vertically
+
+        self.top_margin = (game_height - board_height) // 2  # Center vertically
 
         # Select images for pairs and bomb
         num_pairs = (self.rows * self.cols - self.num_bombs) // 2
@@ -108,9 +108,9 @@ class GameLogic:
                 if not self.bomb_shuffled:
                     self.shuffle_unmatched_cards()
                     self.bomb_shuffled = True
-                
+
                 # Update matched_cards and clear flipped_cards after bomb
-                 # Only add the bomb to matched_cards
+                # Only add the bomb to matched_cards
                 bomb_idx = idx1 if card1 == "bomb" else idx2
                 self.matched_cards.add(bomb_idx)
 
@@ -127,20 +127,24 @@ class GameLogic:
                     self.flipped_cards = []
                     self.flip_time = 0  # Reset the timer
         elif len(self.flipped_cards) == 1:
-             self.flip_time = pygame.time.get_ticks()
+            self.flip_time = pygame.time.get_ticks()
 
     def shuffle_unmatched_cards(self):
-        # Shuffle only unmatched and non-bomb cards
         unmatched_indices = [
-            i
-            for i in range(len(self.cards))
-            if i not in self.matched_cards and self.cards[i] != "bomb"
+            i for i in range(len(self.cards)) if i not in self.matched_cards and i not in self.bomb_indices
         ]
-        unmatched_cards = [self.cards[i] for i in unmatched_indices]
-        random.shuffle(unmatched_cards)
 
-        for i, idx in enumerate(unmatched_indices):
-            self.cards[idx] = unmatched_cards[i]
+        if unmatched_indices:
+            # Generate a derangement of unmatched cards
+            shuffled_cards = [self.cards[i] for i in unmatched_indices]
+            while True:
+                random.shuffle(shuffled_cards)
+                if all(shuffled_cards[i] != self.cards[unmatched_indices[i]] for i in range(len(unmatched_indices))):
+                    break
+
+            # Update the self.cards list with the shuffled values at the correct indices
+            for i, idx in enumerate(unmatched_indices):
+                self.cards[idx] = shuffled_cards[i]
 
     def handle_click(self, pos):
         # Use stored rects for collision detection
@@ -152,6 +156,12 @@ class GameLogic:
             ):
                 if len(self.flipped_cards) < 2:
                     self.flipped_cards.append(idx)
+                    
+                    # Reset bomb_shuffled if a non-bomb card is clicked
+                    if len(self.flipped_cards) == 1:
+                        card_idx = self.flipped_cards[0]
+                        if self.cards[card_idx] != "bomb":
+                            self.bomb_shuffled = False
                 break
 
     def game_loop(self):
