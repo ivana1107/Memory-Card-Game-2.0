@@ -28,9 +28,11 @@ class GameLogic:
         self.flip_time = 0
 
         # Animation parameters
-        self.card_animation_duration = 1000  # Duration of shuffle animation in milliseconds
+        self.card_animation_duration = 500  # Duration of shuffle animation in milliseconds, made shorter
         self.shuffle_start_time = None  # Timestamp when shuffle starts
         self.shuffle_animating = False  # Flag to control the animation
+        self.original_card_positions = []
+        self.new_card_positions = []
 
     def get_level_config(self):
         if self.difficulty == "easy":
@@ -87,88 +89,123 @@ class GameLogic:
             )
             self.card_rects.append(rect)
 
-    def start_shuffle(self):
-    # Initialize new_card_positions with target positions
+    def start_shuffle_animation(self):
+        # Initialize card positions for animation
+        self.original_card_positions = [rect.topleft for rect in self.card_rects]
         self.new_card_positions = []
-        for idx, rect in enumerate(self.card_rects):
-        # Store the final target position for each card in self.new_card_positions
-            target_x = random.randint(self.left_margin, self.screen.get_width() - self.assets["pic_size"])
-            target_y = random.randint(self.top_margin, self.screen.get_height() - self.assets["pic_size"])
-            self.new_card_positions.append((target_x, target_y))
+
+        # Get the indices of unmatched and non-bomb cards
+        unmatched_non_bomb_indices = [i for i in range(len(self.cards)) if i not in self.matched_cards and i not in self.bomb_indices]
+
+        # Create a list of positions for unmatched cards
+        unmatched_card_positions = [self.original_card_positions[i] for i in unmatched_non_bomb_indices]
+
+        # Shuffle these positions
+        random.shuffle(unmatched_card_positions)
+
+        # Assign the shuffled positions to new_card_positions
+        for pos in unmatched_card_positions:
+            self.new_card_positions.append(pos)
+
+        # Set the animation flag and start time
+        self.shuffle_animating = True
+        self.shuffle_start_time = pygame.time.get_ticks()
 
     def animate_shuffle(self, current_time):
-    # Initialize shuffle_start_time if shuffle is starting
-        if self.shuffle_animating and not hasattr(self, 'shuffle_start_time'):
-            self.shuffle_start_time = current_time
-        print(f"shuffle_start_time initialized at {self.shuffle_start_time}")
-    
         if self.shuffle_animating:
-        # Ensure shuffle_start_time is not None before calculating elapsed time
             if self.shuffle_start_time is not None:
                 elapsed_time = current_time - self.shuffle_start_time
-            
-            if elapsed_time < self.card_animation_duration:
-                # Calculate progress of animation (0 to 1)
-                progress = elapsed_time / self.card_animation_duration
-                
-                # Ensure both lists have the same length
-                if len(self.new_card_positions) == len(self.card_rects):
-                    # Update the card positions based on animation progress
-                    for i, rect in enumerate(self.card_rects):
-                        x_offset = self.new_card_positions[i][0] - rect.x
-                        y_offset = self.new_card_positions[i][1] - rect.y
-                        rect.x += int(x_offset * progress)
-                        rect.y += int(y_offset * progress)
-                else:
-                    print(f"ERROR: The lengths of new_card_positions ({len(self.new_card_positions)}) and card_rects ({len(self.card_rects)}) do not match!")
             else:
-                # Once animation is done, snap the cards to final positions
-                for i, rect in enumerate(self.card_rects):
-                    rect.x = self.new_card_positions[i][0]
-                    rect.y = self.new_card_positions[i][1]
-                self.shuffle_animating = False
-                # Reset shuffle_start_time once animation is done
-                del self.shuffle_start_time
-        else:
-            # Print a message if shuffle_start_time is None unexpectedly
-            print("ERROR: shuffle_start_time is None!")
+                elapsed_time = 0
 
+            if elapsed_time >= self.card_animation_duration:
+                # Animation is finished
+                self.shuffle_animating = False
+                self.shuffle_start_time = None
+
+                # Make sure card positions are updated correctly after animation
+                unmatched_non_bomb_indices = [i for i in range(len(self.cards)) if i not in self.matched_cards and i not in self.bomb_indices]
+                for i, idx in enumerate(unmatched_non_bomb_indices):
+                    self.card_rects[idx].topleft = self.new_card_positions[i]
+                return
+
+            # Calculate animation progress
+            progress = elapsed_time / self.card_animation_duration
+
+            # Animate only unmatched and non-bomb cards
+            unmatched_non_bomb_indices = [i for i in range(len(self.cards)) if i not in self.matched_cards and i not in self.bomb_indices]
+            for i, idx in enumerate(unmatched_non_bomb_indices):
+                rect = self.card_rects[idx]
+                target_pos = self.new_card_positions[i]
+                original_pos = self.original_card_positions[idx]
+                rect.x = int(original_pos[0] + (target_pos[0] - original_pos[0]) * progress)
+                rect.y = int(original_pos[1] + (target_pos[1] - original_pos[1]) * progress)
 
     def shuffle_unmatched_cards(self):
+        # Identify unmatched and non-bomb cards
         unmatched_indices = [
-        i for i in range(len(self.cards)) if i not in self.matched_cards and i not in self.bomb_indices
-    ]
+            i for i in range(len(self.cards)) if i not in self.matched_cards and i not in self.bomb_indices
+        ]
 
         if unmatched_indices:
-        # Generate a derangement of unmatched cards
+            # Generate a derangement of unmatched cards
             shuffled_cards = [self.cards[i] for i in unmatched_indices]
             while True:
                 random.shuffle(shuffled_cards)
                 if all(shuffled_cards[i] != self.cards[unmatched_indices[i]] for i in range(len(unmatched_indices))):
                     break
 
-        # Store the new positions for the animation
-        self.new_card_positions = []
-        for i, idx in enumerate(unmatched_indices):
-            x = idx % self.cols
-            y = idx // self.cols
-            pos_x = (
-                x * (self.assets["pic_size"] + self.assets["padding"])
-                + self.left_margin
-            )
-            pos_y = (
-                y * (self.assets["pic_size"] + self.assets["padding"])
-                + self.top_margin
-            )
-            self.new_card_positions.append((pos_x, pos_y))
+            # Update the self.cards list with the shuffled values at the correct indices
+            for i, idx in enumerate(unmatched_indices):
+                self.cards[idx] = shuffled_cards[i]
+        
+        # Start the shuffle animation
+        self.start_shuffle_animation()
 
-        # Start the animation
-        self.shuffle_start_time = pygame.time.get_ticks()
-        self.shuffle_animating = True
+    def draw_rounded_rect(self, rect, color, radius):
+        """Draw a rounded rectangle."""
+        rect = pygame.Rect(rect)
+        color = pygame.Color(*color)
+        alpha = color.a
+        color.a = 0
+        pos = rect.topleft
+        rect.topleft = 0, 0
+        rectangle = pygame.Surface(rect.size, pygame.SRCALPHA)
 
-        # Update the self.cards list with the shuffled values at the correct indices
-        for i, idx in enumerate(unmatched_indices):
-            self.cards[idx] = shuffled_cards[i]
+        circle = pygame.Surface([min(rect.size)*3]*2, pygame.SRCALPHA)
+        pygame.draw.ellipse(circle, (0, 0, 0), circle.get_rect(), 0)
+        circle = pygame.transform.smoothscale(circle, [int(min(rect.size)*radius)]*2)
+
+        radius = rectangle.blit(circle, (0, 0))
+        radius.bottomright = rect.bottomright
+        rectangle.blit(circle, radius)
+        radius.topright = rect.topright
+        rectangle.blit(circle, radius)
+        radius.bottomleft = rect.bottomleft
+        rectangle.blit(circle, radius)
+
+        rectangle.fill((0, 0, 0), rect.inflate(-radius.w, 0))
+        rectangle.fill((0, 0, 0), rect.inflate(0, -radius.h))
+
+        rectangle.fill(color, special_flags=pygame.BLEND_RGBA_MAX)
+        rectangle.fill((255, 255, 255, alpha), special_flags=pygame.BLEND_RGBA_MIN)
+
+        return self.screen.blit(rectangle, pos)
+
+    def draw_card_back(self, rect):
+        # Draw the card back with rounded corners
+        border_radius = 10
+        self.draw_rounded_rect(rect, (200, 200, 200), border_radius)  # Change color if needed
+        self.screen.blit(self.card_back, rect)
+
+    def draw_card_face(self, rect, card):
+        # Draw the card face (image) without rounded corners
+        if card == "bomb":
+            image = self.assets["bomb_image"]
+        else:
+            image = pygame.image.load(f"Assets/object/{card}.png")
+        image = pygame.transform.scale(image, (self.assets["pic_size"], self.assets["pic_size"]))
+        self.screen.blit(image, rect)
 
     def draw_board(self):
         # Animate the card shuffle
@@ -177,20 +214,14 @@ class GameLogic:
 
         # Draw the game board
         for idx, card in enumerate(self.cards):
-            rect = self.card_rects[idx]  # Use stored rect
+            rect = self.card_rects[idx]
 
             if idx in self.flipped_cards or idx in self.matched_cards:
-                if card == "bomb":
-                    self.screen.blit(self.assets["bomb_image"], rect)
-                else:
-                    image = pygame.image.load(f"Assets/object/{card}.png")
-                    image = pygame.transform.scale(
-                        image, (self.assets["pic_size"], self.assets["pic_size"])
-                    )
-                    self.screen.blit(image, rect)
+                # Draw face-up card
+                self.draw_card_face(rect, card)
             else:
-                # Draw card back image instead of gray rectangle
-                self.screen.blit(self.card_back, rect)
+                # Draw face-down card (card back)
+                self.draw_card_back(rect)
 
     def check_match(self):
         if len(self.flipped_cards) == 2:
@@ -199,9 +230,8 @@ class GameLogic:
 
             if card1 == "bomb" or card2 == "bomb":
                 # Bomb triggered: Keep bomb open and shuffle unmatched cards
-                if not self.bomb_shuffled:
-                    self.shuffle_unmatched_cards()
-                    self.bomb_shuffled = True
+                self.shuffle_unmatched_cards()
+                self.bomb_shuffled = True
 
                 # Update matched_cards and clear flipped_cards after bomb
                 # Only add the bomb to matched_cards
@@ -224,6 +254,8 @@ class GameLogic:
             self.flip_time = pygame.time.get_ticks()
 
     def handle_click(self, pos):
+        # Play tap sound when a card is clicked
+        self.tap_sound.play()
         # Use stored rects for collision detection
         for idx, rect in enumerate(self.card_rects):
             if (
@@ -242,7 +274,8 @@ class GameLogic:
                 break
 
     def game_loop(self):
-        self.load_cards()  # Now load_cards can access game_width from screen
+        self.load_assets()
+        self.load_cards()
         clock = pygame.time.Clock()
 
         while True:
@@ -282,48 +315,17 @@ class GameLogic:
         self.bomb_shuffled = False
         self.card_rects = []
         self.flip_time = 0
-        self.game_timer.reset()  # Assuming you have a reset method in your timer class
+        self.game_timer.reset(self.difficulty)  # Pass the difficulty level to reset
+        self.shuffle_animating = False  # Reset animation flag
+        self.shuffle_start_time = None
+        self.new_card_positions = []
+        self.original_card_positions = []
         self.load_cards()
 
     def load_assets(self):
         # Load card back image
         self.card_back = pygame.image.load("Assets/card_back.png")
         self.card_back = pygame.transform.scale(self.card_back, (self.assets["pic_size"], self.assets["pic_size"]))
-
-    def draw_board(self):
-        # Animate the card shuffle
-        current_time = pygame.time.get_ticks()
-        self.animate_shuffle(current_time)
-
-        # Draw the game board
-        for idx, card in enumerate(self.cards):
-            rect = self.card_rects[idx]  # Use stored rect
-
-            if idx in self.flipped_cards or idx in self.matched_cards:
-                if card == "bomb":
-                    self.screen.blit(self.assets["bomb_image"], rect)
-                else:
-                    image = pygame.image.load(f"Assets/object/{card}.png")
-                    image = pygame.transform.scale(
-                        image, (self.assets["pic_size"], self.assets["pic_size"])
-                    )
-                    self.screen.blit(image, rect)
-            else:
-                # Draw card back image instead of gray rectangle
-                self.screen.blit(self.card_back, rect)
-
-    def reset_game(self):
-        """Resets the game state for a new game.""" 
-        self.cards = []
-        self.flipped_cards = []
-        self.matched_cards = set()
-        self.bomb_indices = []
-        self.bomb_shuffled = False
-        self.card_rects = []
-        self.flip_time = 0
-        self.game_timer.reset()
-        self.load_assets()  # Load the card back image
-        self.load_cards()
 
     def card_click(self, card_x, card_y):
         self.tap_sound.play()
