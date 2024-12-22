@@ -141,7 +141,7 @@ def difficulty_selection(screen, get_font):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if easy_button.checkForInput(MAIN_MOUSE_POS):
-                    return "easy"  # Return difficulty
+                    return "easy" 
                 if medium_button.checkForInput(MAIN_MOUSE_POS):
                     return "medium"
                 if hard_button.checkForInput(MAIN_MOUSE_POS):
