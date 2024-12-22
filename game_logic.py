@@ -163,7 +163,7 @@ class GameLogic:
         self.start_shuffle_animation()
 
     def draw_rounded_rect(self, rect, color, radius):
-        """Draw a rounded rectangle."""
+        # Draw a rounded rectangle
         rect = pygame.Rect(rect)
         color = pygame.Color(*color)
         alpha = color.a

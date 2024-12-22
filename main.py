@@ -8,7 +8,7 @@ from end_screen import EndScreen
 pygame.init()
 
 def main():
-    """Main entry point for the game."""
+    # Main entry point for the game
 
     # Set up screen dimensions
     SCREEN_WIDTH = 1200

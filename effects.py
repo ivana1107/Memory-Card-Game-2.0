@@ -2,7 +2,6 @@
 import pygame
 
 def get_font(size):
-    """Returns a Pygame font object."""
     return pygame.font.Font("Assets/Pixelicious.ttf", size)
 
 class Button:
@@ -30,13 +29,13 @@ class Button:
         self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
 
     def update(self, screen):
-        """Draw the button on the screen."""
+        # Draw the button on the screen
         if self.image is not None:
             screen.blit(self.image, self.rect)
         screen.blit(self.text, self.text_rect)
 
     def changeColor(self, position):
-        """Change the button text color based on hover state."""
+        # Change the button text color based on hover state
         if self.rect.collidepoint(position):
             self.text = self.font.render(self.text_input, True, self.hovering_color)
         else:
@@ -46,7 +45,7 @@ class Button:
         self.sound.play()
 
     def checkForInput(self, position):
-        """Check if the button is clicked."""
+        # Check if the button is clicked
         if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
             self.play_click_sound()
             return True
