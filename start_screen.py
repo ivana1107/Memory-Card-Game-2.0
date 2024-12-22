@@ -3,11 +3,8 @@ import random
 import os
 from effects import *
 
-
-print("main_menu.py is being loaded")
-
 def main_menu(screen):
-    """Main menu screen."""
+    # Main menu screen
     while True:
         screen.fill((0, 0, 0))  # Black background
         screen.blit(pygame.image.load("Assets/bg/main_menu.png"), (0, 0))  # Background image
@@ -39,12 +36,15 @@ def main_menu(screen):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if play_button.checkForInput(MAIN_MOUSE_POS):
-                    selected_level = difficulty_selection(screen, get_font)  # Get selected level
-                    return selected_level  
+                    selected_level = difficulty_selection(
+                        screen, get_font
+                    )  # Get selected level
+                    return selected_level
                 if quit_button.checkForInput(MAIN_MOUSE_POS):
                     pygame.quit()
                     exit()
         pygame.display.update()
+
 
 class MemoryCardGame:
     def __init__(self, game_width=1200, game_height=760, pic_size=128, padding=10, left_margin=75, top_margin=70):
@@ -69,7 +69,7 @@ class MemoryCardGame:
         self.load_assets()
 
     def load_assets(self):
-        """Load all required images and assets."""
+        # Load all required images and assets
         game_icon = pygame.image.load('Assets/bg/game_layout.png')
         pygame.display.set_icon(game_icon)
 
@@ -88,37 +88,21 @@ class MemoryCardGame:
         except FileNotFoundError as e:
             print(f"Error loading memory pictures: {e}")
 
-
     def get_font(self, size):
         return pygame.font.Font("Assets/Pixelicious.ttf", size)
 
     def run(self, selected_level):
-        """Main entry point for the game."""
+        # Main entry point for the game
         self.selected_level = selected_level
-        selected_level = main_menu(self.screen)
-
-        if not selected_level:
+                
+        if not self.selected_level:
             print("No difficulty selected, exiting.")
             pygame.quit()
             return
-
-        print(f"Starting game at {selected_level} difficulty.")
-
-
-        try:
-            # Set up the game with the selected difficulty
-            nem_pics, nem_pics_rect, selected_images, hidden_images = level_manager.setup_game(self.selected_level)
-        except ValueError as e:
-            print(f"Error: {e}")
-            print("Returning to main menu...")
-            return  # Return to main menu instead of crashing
-
-        # Start the game loop
-        level_manager.game_loop(selected_images, hidden_images)
-        print("Game over!")
+        print(f"Starting game at {self.selected_level} difficulty.")
 
 def difficulty_selection(screen, get_font):
-    """Screen for selecting difficulty level."""
+    # Screen for selecting difficulty level
     while True:
         screen.fill((0, 0, 0))  # Black background
         screen.blit(pygame.image.load("Assets/bg/difficulty_menu.png"), (0, 0))  # Difficulty selection background

@@ -2,15 +2,10 @@ import pygame
 from start_screen import main_menu
 from start_screen import MemoryCardGame
 from game_logic import GameLogic
-from end_screen import EndScreen  # Import the EndScreen function
+from end_screen import EndScreen
 
 # Initialize Pygame and Mixer
 pygame.init()
-pygame.mixer.init()
-
-# Load Background Music
-# pygame.mixer.music.load('Assets/star.mp3')
-# pygame.mixer.music.play(-1)  # Play music in a loop
 
 def main():
     """Main entry point for the game."""

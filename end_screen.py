@@ -9,9 +9,11 @@ def EndScreen(screen, result, selected_level):
     if result == "win":
         background = pygame.image.load("Assets/bg/win_screen.png")
         sound = pygame.mixer.Sound("Assets/win.wav")
+        button_color = (66, 94, 150) 
     elif result == "lose":
         background = pygame.image.load("Assets/bg/lose_screen.png")
         sound = pygame.mixer.Sound("Assets/lose.wav")
+        button_color = "white"
     else:
         raise ValueError("Invalid result: should be 'win' or 'lose'")
 
@@ -25,8 +27,8 @@ def EndScreen(screen, result, selected_level):
     def get_font(size):
         return pygame.font.Font("Assets/Pixelicious.ttf", size)
 
-    again_button = Button(image=None, pos=(405, 470), text_input="play again", font=get_font(45), base_color="white", hovering_color="yellow")
-    back_button = Button(image=None, pos=(440, 550), text_input="back to menu", font=get_font(45), base_color="white", hovering_color="red")
+    again_button = Button(image=None, pos=(405, 470), text_input="play again", font=get_font(45), base_color=button_color, hovering_color="yellow")
+    back_button = Button(image=None, pos=(440, 550), text_input="back to menu", font=get_font(45), base_color=button_color, hovering_color="red")
 
     running = True
     while running:

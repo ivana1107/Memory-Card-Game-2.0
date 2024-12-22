@@ -59,7 +59,7 @@ class timer:
         return self.time_left <= 0
 
     def reset(self, level):
-        """Resets the timer to its initial state with new time limit based on level."""
+        # Resets the timer to its initial state with new time limit based on level
         self.level = level
         self.start_time = pygame.time.get_ticks()
         self.time_limit = self.time_limits[level]  # Update time_limit based on level

@@ -59,7 +59,7 @@ class GameLogic:
         )
 
         # Adjust left_margin to be closer to the left edge
-        self.left_margin = (game_width - board_width) // 4  # Reduced to //4 to shift left
+        self.left_margin = (game_width - board_width) // 4  
         self.top_margin = (game_height - board_height) // 2  # Center vertically
 
         # Select images for pairs and bomb
@@ -195,7 +195,7 @@ class GameLogic:
     def draw_card_back(self, rect):
         # Draw the card back with rounded corners
         border_radius = 10
-        self.draw_rounded_rect(rect, (200, 200, 200), border_radius)  # Change color if needed
+        self.draw_rounded_rect(rect, (200, 200, 200), border_radius) 
         self.screen.blit(self.card_back, rect)
 
     def draw_card_face(self, rect, card):
@@ -278,6 +278,11 @@ class GameLogic:
         self.load_cards()
         clock = pygame.time.Clock()
 
+        # Load and play background music
+        pygame.mixer.music.load('Assets/star.mp3')
+        pygame.mixer.music.set_volume(0.3)  # Set volume to 30%
+        pygame.mixer.music.play(-1)  # Play in a loop
+
         while True:
             clock.tick(30)
 
@@ -289,6 +294,7 @@ class GameLogic:
             self.game_timer.display()
 
             if self.game_timer.is_time_up():
+                pygame.mixer.music.stop()
                 return "lose"
 
             for event in pygame.event.get():
@@ -302,12 +308,13 @@ class GameLogic:
 
             # Win condition: Check if all cards are matched
             if len(self.matched_cards) == len(self.cards):
+                pygame.mixer.music.stop()
                 return "win"
 
             pygame.display.update()
 
     def reset_game(self):
-        """Resets the game state for a new game."""
+        # Resets the game state for a new game
         self.cards = []
         self.flipped_cards = []
         self.matched_cards = set()
